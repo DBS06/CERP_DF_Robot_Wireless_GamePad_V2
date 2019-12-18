@@ -3,7 +3,7 @@
 
 /* Do it only if this file is used with an Arduino */
 #if defined(ARDUINO) && ARDUINO >= 100
-#include "Arduino.h"
+#include <Arduino.h>
 #elif defined(ARDUINO) && ARDUINO < 100
 #include "WProgram.h"
 #include "pins_arduino.h"
@@ -11,7 +11,7 @@
 
 #include <stdint.h>
 
-namespace gpl
+namespace cerp
 {
 /**
  * @brief   GamePad-Control to Pin-Numbers.
@@ -95,6 +95,6 @@ static const uint8_t joystickPins[aMAX] = {
     JPR_X,
     JPR_Y,
 };
-}  // namespace gpl
+}  // namespace cerp
 
 #endif  // !GAME_PAD_PINS_H

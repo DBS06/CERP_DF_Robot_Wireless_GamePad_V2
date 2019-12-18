@@ -2,14 +2,14 @@
 #define GAME_PAD_CTRL_H
 
 /* Do it only if this file is used with an Arduino */
+#include <Arduino.h>
 #include <stdint.h>
-#include "Arduino.h"
 #include "Filter.h"
 #include "GamePadMsg.h"
 #include "GamePadPins.h"
 #include "MegunoLink.h"
 
-namespace gpl
+namespace cerp
 {
 /**
  * @brief Chaja Embedded Robot Platform - Gamepad Class represents the
@@ -114,8 +114,8 @@ private:
      */
     int8_t normalizeAnalogStickVal(const int16_t stickVal, const int16_t centerVal);
 
-    gpl::GamePadInpCtrlMsg mInpCtrlMsg;  ///< input control message
-    gpl::GamePadOutCtrlMsg mOutCtrlMsg;  ///< output control message
+    cerp::GamePadInpCtrlMsg mInpCtrlMsg;  ///< input control message
+    cerp::GamePadOutCtrlMsg mOutCtrlMsg;  ///< output control message
 
     const uint8_t mStickUpperVal;  ///< Analog-Stick-Max-Postion Value
     const uint8_t mStickLowerVal;  ///< Analog-Stick-Min-Postion Value
@@ -132,8 +132,9 @@ private:
 
     static const uint16_t ANALOG_READ_MIN_VAL = 0x0;        ///< analog read minimum value
     static const uint16_t ANALOG_READ_MAX_VAL = 0x400 - 1;  ///< analog read maximum value
+    static const size_t PRINT_BUF_SIZE        = 42;         ///< minimum print buffer length
 };
 
-}  // namespace gpl
+}  // namespace cerp
 
 #endif  // GAME_PAD_CTRL_H

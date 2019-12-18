@@ -1,0 +1,39 @@
+#####################################################################
+# Syntax Coloring Map for CERP_DF_Robot_Wireless_GamePad_V2 Library #
+#####################################################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+GamePadInpCtr       KEYWORD1
+GamePadOutCtr       KEYWORD1
+GamePadMsgHeader    KEYWORD1
+GamePadInpCtrlMsg   KEYWORD1
+GamePadOutCtrlMsg   KEYWORD1
+GamePadCtrl         KEYWORD1
+GamePadCtrlRx       KEYWORD1
+
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin               KEYWORD2
+updateInpCtrlData   KEYWORD2
+transmitInpCtrMsg   KEYWORD2
+printInpCtrlData    KEYWORD2
+parseOutCtrlData    KEYWORD2
+execOutCtrlMsg      KEYWORD2
+parseOutCtrlData    KEYWORD2
+GamePadInpCtr       KEYWORD2
+setGamePadCmd       KEYWORD2
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+GPMH_MAGIC          LITERAL1
+GPMH_CMD_INP        LITERAL1
+GPMH_CMD_OUT        LITERAL1

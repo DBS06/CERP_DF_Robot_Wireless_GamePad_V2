@@ -2,7 +2,7 @@
 
 ![Gamepad](./wireless_gamepad_v2.0_top_picture.jpg)
 
-Is a lightweight application and "library" for "Wireless GamePad V2.0 for Arduino" from DF-Robot (https://www.dfrobot.com/product-858.html).
+Is a lightweight library for "Wireless GamePad V2.0 for Arduino" from DF-Robot (https://www.dfrobot.com/product-858.html).
 The motivation for writing this application and library was the dissatisfaction with provided code from DF-Robot.
 
 The incoming and outcomming messages will be transmitted in a binary format,

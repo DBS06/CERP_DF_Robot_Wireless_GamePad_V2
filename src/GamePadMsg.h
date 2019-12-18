@@ -3,7 +3,7 @@
 
 /* Do it only if this file is used with an Arduino */
 #if defined(ARDUINO) && ARDUINO >= 100
-#include "Arduino.h"
+#include <Arduino.h>
 #elif defined(ARDUINO) && ARDUINO < 100
 #include "WProgram.h"
 #include "pins_arduino.h"
@@ -11,7 +11,7 @@
 
 #include <stdint.h>
 
-namespace gpl
+namespace cerp
 {
 /**
  * @brief   Structure to hold GamePad-Input-Controls.
@@ -108,6 +108,6 @@ static const uint8_t GPMH_MAGIC   = 0x66;
 static const uint8_t GPMH_CMD_INP = 0x01;
 static const uint8_t GPMH_CMD_OUT = 0x10;
 
-}  // namespace gpl
+}  // namespace cerp
 
 #endif  // !GAME_PAD_MSG_H

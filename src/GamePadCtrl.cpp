@@ -1,7 +1,7 @@
 #include "GamePadCtrl.h"
+#include <Arduino.h>
 #include <assert.h>
 #include <stdio.h>
-#include "Arduino.h"
 #include "GamePadMsg.h"
 #include "GamePadPins.h"
 
@@ -29,9 +29,9 @@
         (byte & 0x0002 ? '1' : '0'), /* 0000000000000010 */ \
         (byte & 0x0001 ? '1' : '0')  /* 0000000000000001 */
 
-gpl::GamePadCtrl::GamePadCtrl(const uint8_t filterWeight,
-                              const int8_t analogStickUpperVal,
-                              const int8_t analogStickLowerVal) :
+cerp::GamePadCtrl::GamePadCtrl(const uint8_t filterWeight,
+                               const int8_t analogStickUpperVal,
+                               const int8_t analogStickLowerVal) :
     mInpCtrlMsg(),
     mOutCtrlMsg(),
     mStickUpperVal(analogStickUpperVal),
@@ -47,11 +47,11 @@ gpl::GamePadCtrl::GamePadCtrl(const uint8_t filterWeight,
 {
 }
 
-gpl::GamePadCtrl::~GamePadCtrl()
+cerp::GamePadCtrl::~GamePadCtrl()
 {
 }
 
-void gpl::GamePadCtrl::begin(void)
+void cerp::GamePadCtrl::begin(void)
 {
     initPins();
     calibrate();
@@ -68,7 +68,7 @@ void gpl::GamePadCtrl::begin(void)
     digitalWrite(LED, LOW);
 }
 
-void gpl::GamePadCtrl::initPins(void)
+void cerp::GamePadCtrl::initPins(void)
 {
     for (size_t i = 0; i < iMAX; i++)
     {
@@ -78,7 +78,7 @@ void gpl::GamePadCtrl::initPins(void)
     pinMode(VIB_MOTOR, OUTPUT);
 }
 
-void gpl::GamePadCtrl::calibrate(void)
+void cerp::GamePadCtrl::calibrate(void)
 {
     // Wait to Settle down the analog-stick values and button states
     for (size_t i = 0; i < ANALOG_SETTLE_MEASUREMENTS; i++)
@@ -93,13 +93,13 @@ void gpl::GamePadCtrl::calibrate(void)
     mRStickYCenterVal = mEfRStickY.Current();
 }
 
-void gpl::GamePadCtrl::updateInpCtrlData(void)
+void cerp::GamePadCtrl::updateInpCtrlData(void)
 {
     readAnalogSticks();
     readButtons();
 }
 
-void gpl::GamePadCtrl::readButtons(void)
+void cerp::GamePadCtrl::readButtons(void)
 {
     mInpCtrlMsg.ctr.select = (digitalRead(buttonPins[iSELECT]) == HIGH ? 0 : 1);
     mInpCtrlMsg.ctr.start  = (digitalRead(buttonPins[iSTART]) == HIGH ? 0 : 1);
@@ -119,7 +119,7 @@ void gpl::GamePadCtrl::readButtons(void)
     mInpCtrlMsg.ctr.r3     = (digitalRead(buttonPins[iR3]) == HIGH ? 0 : 1);
 }
 
-void gpl::GamePadCtrl::readAnalogSticks(void)
+void cerp::GamePadCtrl::readAnalogSticks(void)
 {
     mEfLStickX.Filter(analogRead(joystickPins[aJLX]));
     mEfLStickY.Filter(analogRead(joystickPins[aJLY]));
@@ -132,7 +132,7 @@ void gpl::GamePadCtrl::readAnalogSticks(void)
     mInpCtrlMsg.ctr.rightStickY = normalizeAnalogStickVal(mEfRStickY.Current(), mRStickYCenterVal);
 }
 
-int8_t gpl::GamePadCtrl::normalizeAnalogStickVal(const int16_t stickVal, const int16_t centerVal)
+int8_t cerp::GamePadCtrl::normalizeAnalogStickVal(const int16_t stickVal, const int16_t centerVal)
 {
     if (stickVal > centerVal)
     {
@@ -148,12 +148,12 @@ int8_t gpl::GamePadCtrl::normalizeAnalogStickVal(const int16_t stickVal, const i
     }
 }
 
-void gpl::GamePadCtrl::transmitInpCtrMsg(Stream &stream)
+void cerp::GamePadCtrl::transmitInpCtrMsg(Stream &stream)
 {
     stream.write(mInpCtrlMsg.data, sizeof(GamePadInpCtrlMsg));
 }
 
-void gpl::GamePadCtrl::printInpCtrlData(Serial_ &serial)
+void cerp::GamePadCtrl::printInpCtrlData(Serial_ &serial)
 {
     const size_t printBufSize   = 64;
     char printBuf[printBufSize] = {};
@@ -171,7 +171,7 @@ void gpl::GamePadCtrl::printInpCtrlData(Serial_ &serial)
     serial.println(printBuf);
 }
 
-bool gpl::GamePadCtrl::parseOutCtrlData(Stream &stream, Serial_ *serial)
+bool cerp::GamePadCtrl::parseOutCtrlData(Stream &stream, Serial_ *serial)
 {
     if (stream.available())
     {
@@ -182,10 +182,9 @@ bool gpl::GamePadCtrl::parseOutCtrlData(Stream &stream, Serial_ *serial)
         {
             if (serial != nullptr)
             {
-                const size_t printBufSize   = 64;
-                char printBuf[printBufSize] = {};
+                char printBuf[PRINT_BUF_SIZE] = {};
 
-                snprintf(printBuf, printBufSize, "CMD -> %02X|%02X|%02X|%02X", mOutCtrlMsg.header.magic,
+                snprintf(printBuf, PRINT_BUF_SIZE, "CMD -> %02X|%02X|%02X|%02X", mOutCtrlMsg.header.magic,
                          mOutCtrlMsg.header.cmd, mOutCtrlMsg.header.length, mOutCtrlMsg.ctr.cmds);
 
                 serial->println(printBuf);
@@ -197,7 +196,7 @@ bool gpl::GamePadCtrl::parseOutCtrlData(Stream &stream, Serial_ *serial)
     return false;
 }
 
-void gpl::GamePadCtrl::execOutCtrlMsg()
+void cerp::GamePadCtrl::execOutCtrlMsg()
 {
     digitalWrite(VIB_MOTOR, (mOutCtrlMsg.ctr.vibration == 1 ? HIGH : LOW));
 }

@@ -2,11 +2,11 @@
 #ifndef GAME_PAD_CTRL_RX_H
 #define GAME_PAD_CTRL_RX_H
 
+#include <Arduino.h>
 #include <stdint.h>
-#include "Arduino.h"
 #include "GamePadMsg.h"
 
-namespace gpl
+namespace cerp
 {
 class GamePadCtrlRx
 {
@@ -18,14 +18,19 @@ public:
     GamePadCtrlRx &operator=(const GamePadCtrlRx &) = default;
     ~GamePadCtrlRx();
 
-    bool parseOutCtrlData(Stream *serial);
+    void begin(uint32_t serialTimeoutMs);
+    bool parseOutCtrlData(char *printBuf, size_t printBufSize = 43);
+    const GamePadInpCtr &getInpCtrl(void);
+    void setGamePadCmd(const GamePadOutCtr &cmd);
 
 private:
-    Stream &mHwSerial;                   ///< serial connection to i.e. communication module
-    gpl::GamePadInpCtrlMsg mInpCtrlMsg;  ///< input message
-    gpl::GamePadOutCtrlMsg mOutCtrlMsg;  ///< output message
+    Stream &mStream;                      ///< serial connection to i.e. communication module
+    cerp::GamePadInpCtrlMsg mInpCtrlMsg;  ///< input message
+    cerp::GamePadOutCtrlMsg mOutCtrlMsg;  ///< output message
+
+    static const size_t PRINT_BUF_SIZE = 42;  ///< minimum print buffer length
 };
 
-}  // namespace gpl
+}  // namespace cerp
 
 #endif  // !GAME_PAD_CTRL_RX_H

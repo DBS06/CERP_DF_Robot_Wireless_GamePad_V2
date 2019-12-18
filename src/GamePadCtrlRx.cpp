@@ -19,38 +19,56 @@
         (byte & 0x0002 ? '1' : '0'), /* 0000000000000010 */ \
         (byte & 0x0001 ? '1' : '0')  /* 0000000000000001 */
 
-gpl::GamePadCtrlRx::GamePadCtrlRx(Stream &hwSerial) : mHwSerial(hwSerial), mInpCtrlMsg(), mOutCtrlMsg()
+cerp::GamePadCtrlRx::GamePadCtrlRx(Stream &stream) : mStream(stream), mInpCtrlMsg(), mOutCtrlMsg()
 {
 }
 
-gpl::GamePadCtrlRx::~GamePadCtrlRx()
+cerp::GamePadCtrlRx::~GamePadCtrlRx()
 {
 }
 
-bool gpl::GamePadCtrlRx::parseOutCtrlData(Stream *serial)
+void cerp::GamePadCtrlRx::begin(uint32_t serialTimeoutMs)
 {
-    if (mHwSerial.available())
+    mOutCtrlMsg.header.magic  = GPMH_MAGIC;
+    mOutCtrlMsg.header.cmd    = GPMH_CMD_OUT;
+    mOutCtrlMsg.header.length = sizeof(GamePadOutCtr);
+
+    mStream.setTimeout(serialTimeoutMs);
+    mStream.flush();
+}
+
+bool cerp::GamePadCtrlRx::parseOutCtrlData(char *printBuf, size_t printBufSize)
+{
+    bool msgValid = false;
+
+    if (mStream.available())
     {
-        size_t rb = mHwSerial.readBytes(mInpCtrlMsg.data, sizeof(GamePadInpCtrlMsg));
+        size_t rb = mStream.readBytes(mInpCtrlMsg.data, sizeof(GamePadInpCtrlMsg));
 
         if (rb == sizeof(GamePadInpCtrlMsg) &&
             ((mInpCtrlMsg.header.magic == GPMH_MAGIC) && (mInpCtrlMsg.header.cmd == GPMH_CMD_INP)))
         {
-            if (serial != nullptr)
-            {
-                const size_t printBufSize   = 64;
-                char printBuf[printBufSize] = {};
+            msgValid = true;
 
-                snprintf(printBuf, printBufSize, "CMD -> %02X|%02X|%02X|%04d|%04d|%04d|%04d|" UINT16_TO_BINARY_PATTERN,
-                         mInpCtrlMsg.header.magic, mInpCtrlMsg.header.cmd, mInpCtrlMsg.header.length,
+            if (printBuf != nullptr && printBufSize >= PRINT_BUF_SIZE)
+            {
+                snprintf(printBuf, printBufSize, "CMD |%04d|%04d|%04d|%04d|" UINT16_TO_BINARY_PATTERN,
                          mInpCtrlMsg.ctr.leftStickX, mInpCtrlMsg.ctr.leftStickY, mInpCtrlMsg.ctr.rightStickX,
                          mInpCtrlMsg.ctr.rightStickY, UINT16_TO_BINARY(mInpCtrlMsg.ctr.buttons));
-
-                serial->println(printBuf);
             }
-            return true;
         }
-        mHwSerial.flush();
+        mStream.flush();
     }
-    return false;
+    return msgValid;
+}
+
+const cerp::GamePadInpCtr &cerp::GamePadCtrlRx::getInpCtrl(void)
+{
+    return mInpCtrlMsg.ctr;
+}
+
+void cerp::GamePadCtrlRx::setGamePadCmd(const GamePadOutCtr &cmd)
+{
+    mOutCtrlMsg.ctr.cmds = cmd.cmds;
+    mStream.write(mOutCtrlMsg.data, sizeof(GamePadInpCtrlMsg));
 }

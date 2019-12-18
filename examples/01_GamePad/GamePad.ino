@@ -19,7 +19,7 @@
 
 #define pc Serial
 #define comModule Serial1
-gpl::GamePadCtrl gpCtrl;
+cerp::GamePadCtrl gpCtrl;
 
 ArduinoTimer timerSendMsg;
 ArduinoTimer timerPrint;
