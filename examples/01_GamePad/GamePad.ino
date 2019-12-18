@@ -9,16 +9,16 @@
  *
  */
 
+#include <GamePadCtrl.h>
 #include "Arduino.h"
 #include "ArduinoTimer.h"
-#include "GamePadCtrl.h"
 
 #define PRINT_INP_CTRL_DATA 1
 #define PRINT_OUT_CTRL_DATA 1
 #define FAST_PRINT 0
 
-Serial_ &pc               = Serial;
-HardwareSerial &comModule = Serial1;
+#define pc Serial
+#define comModule Serial1
 gpl::GamePadCtrl gpCtrl;
 
 ArduinoTimer timerSendMsg;
@@ -55,6 +55,7 @@ void setup()
 
 void loop()
 {
+    // Updates input control data
     gpCtrl.updateInpCtrlData();
 
     /* Transmit Input Controls */
