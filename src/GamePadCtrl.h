@@ -64,7 +64,7 @@ public:
      *
      * @param serial    Serial where binary data will be print.
      */
-    void printInpCtrlData(Serial_ &serial);
+    void printInpCtrlData(Stream &serial);
 
     /**
      * @brief   Parses incoming command messages.
@@ -73,7 +73,7 @@ public:
      * @return true     Data available and verified.
      * @return false    No data availabler or verification failed.
      */
-    bool parseOutCtrlData(Stream &stream, Serial_ *serial = nullptr);
+    bool parseOutCtrlData(Stream &stream, Stream *serial = nullptr);
 
     /**
      * @brief   Execute received command message.

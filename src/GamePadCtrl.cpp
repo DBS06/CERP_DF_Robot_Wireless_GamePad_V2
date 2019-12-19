@@ -153,7 +153,7 @@ void cerp::GamePadCtrl::transmitInpCtrMsg(Stream &stream)
     stream.write(mInpCtrlMsg.data, sizeof(GamePadInpCtrlMsg));
 }
 
-void cerp::GamePadCtrl::printInpCtrlData(Serial_ &serial)
+void cerp::GamePadCtrl::printInpCtrlData(Stream &serial)
 {
     const size_t printBufSize   = 64;
     char printBuf[printBufSize] = {};
@@ -171,7 +171,7 @@ void cerp::GamePadCtrl::printInpCtrlData(Serial_ &serial)
     serial.println(printBuf);
 }
 
-bool cerp::GamePadCtrl::parseOutCtrlData(Stream &stream, Serial_ *serial)
+bool cerp::GamePadCtrl::parseOutCtrlData(Stream &stream, Stream *serial)
 {
     if (stream.available())
     {
