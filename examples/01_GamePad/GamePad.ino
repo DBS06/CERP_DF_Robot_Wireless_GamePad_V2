@@ -8,9 +8,9 @@
  * @copyright Copyright DBS06 (c) 2019
  *
  */
-
-#include <GamePadCtrl.h>
 #include "Arduino.h"
+
+#include <CerpGamePad.h>
 #include "ArduinoTimer.h"
 
 #define PRINT_INP_CTRL_DATA 1

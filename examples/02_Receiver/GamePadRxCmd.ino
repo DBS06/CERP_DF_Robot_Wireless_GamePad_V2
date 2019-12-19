@@ -8,10 +8,9 @@
  * @copyright Copyright (c) 2019
  *
  */
-
 #include "Arduino.h"
 
-#include <GamePadCtrlRx.h>
+#include <CerpGamePad.h>
 #include "ArduinoTimer.h"
 
 #define xbee Serial1
