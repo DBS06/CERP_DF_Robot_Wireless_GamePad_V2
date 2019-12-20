@@ -37,7 +37,7 @@ void cerp::GamePadCtrlRx::begin(uint32_t serialTimeoutMs)
     mStream.flush();
 }
 
-bool cerp::GamePadCtrlRx::parseOutCtrlData(char *printBuf, size_t printBufSize)
+bool cerp::GamePadCtrlRx::parseInpCtrlData(char *printBuf, size_t printBufSize)
 {
     bool msgValid = false;
 

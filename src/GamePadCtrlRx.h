@@ -19,7 +19,7 @@ public:
     ~GamePadCtrlRx();
 
     void begin(uint32_t serialTimeoutMs);
-    bool parseOutCtrlData(char *printBuf, size_t printBufSize = 43);
+    bool parseInpCtrlData(char *printBuf = nullptr, size_t printBufSize = 43);
     const GamePadInpCtr &getInpCtrl(void);
     void setGamePadCmd(const GamePadOutCtr &cmd);
 
