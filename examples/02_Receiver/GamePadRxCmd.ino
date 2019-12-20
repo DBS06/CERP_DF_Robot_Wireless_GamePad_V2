@@ -42,7 +42,7 @@ void setup()
 
 void loop()
 {
-    if (gpcr.parseOutCtrlData(printBuf, printBufSize))
+    if (gpcr.parseInpCtrlData(printBuf, printBufSize))
     {
         pc.println(printBuf);
         digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
