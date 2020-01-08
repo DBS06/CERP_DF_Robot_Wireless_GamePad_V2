@@ -24,6 +24,8 @@ public:
     void setGamePadCmd(const GamePadOutCtr &cmd);
 
 private:
+    void calcCrc8Value(void);
+
     Stream &mStream;                      ///< serial connection to i.e. communication module
     cerp::GamePadInpCtrlMsg mInpCtrlMsg;  ///< input message
     cerp::GamePadOutCtrlMsg mOutCtrlMsg;  ///< output message

@@ -114,6 +114,8 @@ private:
      */
     int8_t normalizeAnalogStickVal(const int16_t stickVal, const int16_t centerVal);
 
+    void calcCrc8Value(void);
+
     cerp::GamePadInpCtrlMsg mInpCtrlMsg;  ///< input control message
     cerp::GamePadOutCtrlMsg mOutCtrlMsg;  ///< output control message
 

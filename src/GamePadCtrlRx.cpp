@@ -48,13 +48,22 @@ bool cerp::GamePadCtrlRx::parseInpCtrlData(char *printBuf, size_t printBufSize)
         if (rb == sizeof(GamePadInpCtrlMsg) &&
             ((mInpCtrlMsg.header.magic == GPMH_MAGIC) && (mInpCtrlMsg.header.cmd == GPMH_CMD_INP)))
         {
-            msgValid = true;
+            uint8_t crc8 = cerp::internal::crc8(mInpCtrlMsg.data, sizeof(GamePadInpCtrlMsg) - 1);
+
+            if (crc8 == mInpCtrlMsg.crc8)
+            {
+                msgValid = true;
+            }
 
             if (printBuf != nullptr && printBufSize >= PRINT_BUF_SIZE)
             {
                 snprintf(printBuf, printBufSize, "CMD |%04d|%04d|%04d|%04d|" UINT16_TO_BINARY_PATTERN,
                          mInpCtrlMsg.ctr.leftStickX, mInpCtrlMsg.ctr.leftStickY, mInpCtrlMsg.ctr.rightStickX,
                          mInpCtrlMsg.ctr.rightStickY, UINT16_TO_BINARY(mInpCtrlMsg.ctr.buttons));
+            }
+            else
+            {
+                snprintf(printBuf, PRINT_BUF_SIZE, "CMD INVALID CRC -> %02X != %02X", mOutCtrlMsg.crc8, crc8);
             }
         }
         mStream.flush();
@@ -70,5 +79,6 @@ const cerp::GamePadInpCtr &cerp::GamePadCtrlRx::getInpCtrl(void)
 void cerp::GamePadCtrlRx::setGamePadCmd(const GamePadOutCtr &cmd)
 {
     mOutCtrlMsg.ctr.cmds = cmd.cmds;
-    mStream.write(mOutCtrlMsg.data, sizeof(GamePadInpCtrlMsg));
+    mOutCtrlMsg.crc8     = cerp::internal::crc8(mOutCtrlMsg.data, sizeof(GamePadOutCtrlMsg) - 1);
+    mStream.write(mOutCtrlMsg.data, sizeof(GamePadOutCtrlMsg));
 }

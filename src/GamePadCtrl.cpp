@@ -97,6 +97,7 @@ void cerp::GamePadCtrl::updateInpCtrlData(void)
 {
     readAnalogSticks();
     readButtons();
+    calcCrc8Value();
 }
 
 void cerp::GamePadCtrl::readButtons(void)
@@ -148,6 +149,11 @@ int8_t cerp::GamePadCtrl::normalizeAnalogStickVal(const int16_t stickVal, const 
     }
 }
 
+void cerp::GamePadCtrl::calcCrc8Value(void)
+{
+    mInpCtrlMsg.crc8 = cerp::internal::crc8(mInpCtrlMsg.data, sizeof(GamePadInpCtrlMsg) - 1);
+}
+
 void cerp::GamePadCtrl::transmitInpCtrMsg(Stream &stream)
 {
     stream.write(mInpCtrlMsg.data, sizeof(GamePadInpCtrlMsg));
@@ -173,6 +179,7 @@ void cerp::GamePadCtrl::printInpCtrlData(Stream &serial)
 
 bool cerp::GamePadCtrl::parseOutCtrlData(Stream &stream, Stream *serial)
 {
+    bool ret = false;
     if (stream.available())
     {
         size_t rb = stream.readBytes(mOutCtrlMsg.data, sizeof(GamePadOutCtrlMsg));
@@ -180,20 +187,33 @@ bool cerp::GamePadCtrl::parseOutCtrlData(Stream &stream, Stream *serial)
         if (rb == sizeof(GamePadOutCtrlMsg) &&
             ((mOutCtrlMsg.header.magic == GPMH_MAGIC) && (mOutCtrlMsg.header.cmd == GPMH_CMD_OUT)))
         {
+            uint8_t crc8 = cerp::internal::crc8(mOutCtrlMsg.data, sizeof(GamePadOutCtrlMsg) - 1);
+
+            if (crc8 == mOutCtrlMsg.crc8)
+            {
+                ret = true;
+            }
+
             if (serial != nullptr)
             {
                 char printBuf[PRINT_BUF_SIZE] = {};
 
-                snprintf(printBuf, PRINT_BUF_SIZE, "CMD -> %02X|%02X|%02X|%02X", mOutCtrlMsg.header.magic,
-                         mOutCtrlMsg.header.cmd, mOutCtrlMsg.header.length, mOutCtrlMsg.ctr.cmds);
+                if (ret == true)
+                {
+                    snprintf(printBuf, PRINT_BUF_SIZE, "CMD -> %02X|%02X|%02X|%02X", mOutCtrlMsg.header.magic,
+                             mOutCtrlMsg.header.cmd, mOutCtrlMsg.header.length, mOutCtrlMsg.ctr.cmds);
+                }
+                else
+                {
+                    snprintf(printBuf, PRINT_BUF_SIZE, "CMD INVALID CRC -> %02X != %02X", mOutCtrlMsg.crc8, crc8);
+                }
 
                 serial->println(printBuf);
             }
-            return true;
         }
         stream.flush();
     }
-    return false;
+    return ret;
 }
 
 void cerp::GamePadCtrl::execOutCtrlMsg()
