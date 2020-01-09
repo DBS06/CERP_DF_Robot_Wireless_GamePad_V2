@@ -31,7 +31,7 @@ void cerp::GamePadCtrlRx::begin(uint32_t serialTimeoutMs)
 {
     mOutCtrlMsg.header.magic  = GPMH_MAGIC;
     mOutCtrlMsg.header.cmd    = GPMH_CMD_OUT;
-    mOutCtrlMsg.header.length = sizeof(GamePadOutCtr);
+    mOutCtrlMsg.header.length = sizeof(GamePadOutCtr) + sizeof(uint8_t);
 
     mStream.setTimeout(serialTimeoutMs);
     mStream.flush();
@@ -48,7 +48,7 @@ bool cerp::GamePadCtrlRx::parseInpCtrlData(char *printBuf, size_t printBufSize)
         if (rb == sizeof(GamePadInpCtrlMsg) &&
             ((mInpCtrlMsg.header.magic == GPMH_MAGIC) && (mInpCtrlMsg.header.cmd == GPMH_CMD_INP)))
         {
-            uint8_t crc8 = cerp::internal::crc8(mInpCtrlMsg.data, sizeof(GamePadInpCtrlMsg) - 1);
+            uint8_t crc8 = cerp::internal::crc8(mInpCtrlMsg.data, sizeof(GamePadInpCtrlMsg) - sizeof(uint8_t));
 
             if (crc8 == mInpCtrlMsg.crc8)
             {
@@ -76,9 +76,12 @@ const cerp::GamePadInpCtr &cerp::GamePadCtrlRx::getInpCtrl(void)
     return mInpCtrlMsg.ctr;
 }
 
-void cerp::GamePadCtrlRx::setGamePadCmd(const GamePadOutCtr &cmd)
+void cerp::GamePadCtrlRx::setGamePadCmd(const GamePadOutCtr &cmd, char *printBuf, size_t printBufSize)
 {
     mOutCtrlMsg.ctr.cmds = cmd.cmds;
-    mOutCtrlMsg.crc8     = cerp::internal::crc8(mOutCtrlMsg.data, sizeof(GamePadOutCtrlMsg) - 1);
+    mOutCtrlMsg.crc8     = cerp::internal::crc8(mOutCtrlMsg.data, sizeof(GamePadOutCtrlMsg) - sizeof(uint8_t));
     mStream.write(mOutCtrlMsg.data, sizeof(GamePadOutCtrlMsg));
+
+    snprintf(printBuf, printBufSize, "CMD -> %02X|%02X|%02X|%02X|%02X", mOutCtrlMsg.header.magic,
+             mOutCtrlMsg.header.cmd, mOutCtrlMsg.header.length, mOutCtrlMsg.ctr.cmds, mOutCtrlMsg.crc8);
 }

@@ -21,7 +21,7 @@ public:
     void begin(uint32_t serialTimeoutMs);
     bool parseInpCtrlData(char *printBuf = nullptr, size_t printBufSize = 43);
     const GamePadInpCtr &getInpCtrl(void);
-    void setGamePadCmd(const GamePadOutCtr &cmd);
+    void setGamePadCmd(const GamePadOutCtr &cmd, char *printBuf = nullptr, size_t printBufSize = 43);
 
 private:
     void calcCrc8Value(void);
