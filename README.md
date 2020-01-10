@@ -21,6 +21,7 @@ More Information about the filter can be found here: https://www.megunolink.com/
 * Auto calibration for Analog-Sticks at startup.
 * Noise filtering for Analog-Sticks.
 * Analog-Stick's can be mapped to a user defined lower and upper bound.
+* Calculates a CRC8-Checksum.
 
 **Naming-Convention:**
 
@@ -53,6 +54,7 @@ More Information about the filter can be found here: https://www.megunolink.com/
 | magic  | uint8_t | 1            | 0x66      | Just an identifier to recognize this message as our own.    |
 | cmd    | uint8_t | 1            | 0x01/0x10 | GPMH_CMD_INP (0x01)/GPMH_CMD_OUT(0x10); Command-Identifier; |
 | length | uint8_t | 1            | 0x01-0xFF | Length of the Message (Payload)                             |
+| crc8   | uint8_t | 1            | 0x01-0xFF | CRC8 Checksum                                               |
 
 **GamePadInpCtr:**
 
@@ -96,6 +98,6 @@ More Information about the filter can be found here: https://www.megunolink.com/
 | Name      | Offset  | Output                               |
 |-----------|---------|--------------------------------------|
 | vibration | 0x0     | Turns vibration on/off               |
-| _reserved | 0x1-0xF | Not used! Reserved for future usage. |
+| _reserved | 0xE     | Not used! Reserved for future usage. |
 
 > **_NOTE:_**  The LED is not really controllable from outside, because the electronic turns it on and off if serial-data is received.

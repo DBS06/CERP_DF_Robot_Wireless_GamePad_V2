@@ -86,8 +86,9 @@ union GamePadInpCtrlMsg
     {
         GamePadMsgHeader header;
         GamePadInpCtr ctr;
+        uint8_t crc8;
     };
-    uint8_t data[sizeof(GamePadMsgHeader) + sizeof(GamePadInpCtr)];
+    uint8_t data[sizeof(GamePadMsgHeader) + sizeof(GamePadInpCtr) + sizeof(uint8_t)];
 };
 
 /**
@@ -99,14 +100,27 @@ union GamePadOutCtrlMsg
     {
         GamePadMsgHeader header;
         GamePadOutCtr ctr;
+        uint8_t crc8;
     };
-    uint8_t data[sizeof(GamePadMsgHeader) + sizeof(GamePadOutCtr)];
+    uint8_t data[sizeof(GamePadMsgHeader) + sizeof(GamePadOutCtr) + sizeof(uint8_t)];
 };
 
 /* globale constants */
 static const uint8_t GPMH_MAGIC   = 0x66;
 static const uint8_t GPMH_CMD_INP = 0x01;
 static const uint8_t GPMH_CMD_OUT = 0x10;
+
+namespace internal
+{
+/**
+ * @brief
+ *
+ * @param data
+ * @param len
+ * @return uint8_t
+ */
+uint8_t crc8(uint8_t data[], size_t len);
+}  // namespace internal
 
 }  // namespace cerp
 

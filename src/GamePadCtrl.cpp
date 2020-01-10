@@ -97,6 +97,7 @@ void cerp::GamePadCtrl::updateInpCtrlData(void)
 {
     readAnalogSticks();
     readButtons();
+    mInpCtrlMsg.crc8 = cerp::internal::crc8(mInpCtrlMsg.data, sizeof(GamePadInpCtrlMsg) - sizeof(uint8_t));
 }
 
 void cerp::GamePadCtrl::readButtons(void)
@@ -159,13 +160,13 @@ void cerp::GamePadCtrl::printInpCtrlData(Stream &serial)
     char printBuf[printBufSize] = {};
 
 #if PRINT_AS_HEX == 1
-    snprintf(printBuf, printBufSize, "%04X|%04X|%04X|%04X|" UINT16_TO_BINARY_PATTERN, mInpCtrlMsg.ctr.leftStickX,
-             mInpCtrlMsg.ctr.leftStickY, mInpCtrlMsg.ctr.rightStickX, mInpCtrlMsg.ctr.rightStickY,
-             UINT16_TO_BINARY(mInpCtrlMsg.ctr.buttons));
+    snprintf(printBuf, printBufSize, "%04X|%04X|%04X|%04X|" UINT16_TO_BINARY_PATTERN "|%02X",
+             mInpCtrlMsg.ctr.leftStickX, mInpCtrlMsg.ctr.leftStickY, mInpCtrlMsg.ctr.rightStickX,
+             mInpCtrlMsg.ctr.rightStickY, UINT16_TO_BINARY(mInpCtrlMsg.ctr.buttons), mInpCtrlMsg.crc8);
 #else
-    snprintf(printBuf, printBufSize, "%04d|%04d|%04d|%04d|" UINT16_TO_BINARY_PATTERN, mInpCtrlMsg.ctr.leftStickX,
-             mInpCtrlMsg.ctr.leftStickY, mInpCtrlMsg.ctr.rightStickX, mInpCtrlMsg.ctr.rightStickY,
-             UINT16_TO_BINARY(mInpCtrlMsg.ctr.buttons));
+    snprintf(printBuf, printBufSize, "%04d|%04d|%04d|%04d|" UINT16_TO_BINARY_PATTERN "|%02X",
+             mInpCtrlMsg.ctr.leftStickX, mInpCtrlMsg.ctr.leftStickY, mInpCtrlMsg.ctr.rightStickX,
+             mInpCtrlMsg.ctr.rightStickY, UINT16_TO_BINARY(mInpCtrlMsg.ctr.buttons), mInpCtrlMsg.crc8);
 #endif
 
     serial.println(printBuf);
@@ -173,6 +174,9 @@ void cerp::GamePadCtrl::printInpCtrlData(Stream &serial)
 
 bool cerp::GamePadCtrl::parseOutCtrlData(Stream &stream, Stream *serial)
 {
+    bool ret                      = false;
+    char printBuf[PRINT_BUF_SIZE] = {};
+
     if (stream.available())
     {
         size_t rb = stream.readBytes(mOutCtrlMsg.data, sizeof(GamePadOutCtrlMsg));
@@ -180,23 +184,48 @@ bool cerp::GamePadCtrl::parseOutCtrlData(Stream &stream, Stream *serial)
         if (rb == sizeof(GamePadOutCtrlMsg) &&
             ((mOutCtrlMsg.header.magic == GPMH_MAGIC) && (mOutCtrlMsg.header.cmd == GPMH_CMD_OUT)))
         {
+            uint8_t crc8 = cerp::internal::crc8(mOutCtrlMsg.data, sizeof(GamePadOutCtrlMsg) - sizeof(uint8_t));
+
+            if (crc8 == mOutCtrlMsg.crc8)
+            {
+                ret = true;
+            }
+
             if (serial != nullptr)
             {
-                char printBuf[PRINT_BUF_SIZE] = {};
-
-                snprintf(printBuf, PRINT_BUF_SIZE, "CMD -> %02X|%02X|%02X|%02X", mOutCtrlMsg.header.magic,
-                         mOutCtrlMsg.header.cmd, mOutCtrlMsg.header.length, mOutCtrlMsg.ctr.cmds);
-
+                if (ret == true)
+                {
+                    snprintf(printBuf, PRINT_BUF_SIZE, "CMD -> %02X|%02X|%02X|%02X|%02X", mOutCtrlMsg.header.magic,
+                             mOutCtrlMsg.header.cmd, mOutCtrlMsg.header.length, mOutCtrlMsg.ctr.cmds, mOutCtrlMsg.crc8);
+                }
+                else
+                {
+                    snprintf(printBuf, PRINT_BUF_SIZE, "CMD INVALID CRC -> %02X != %02X", mOutCtrlMsg.crc8, crc8);
+                }
                 serial->println(printBuf);
             }
-            return true;
         }
+        else if (serial != nullptr)
+        {
+            snprintf(printBuf, PRINT_BUF_SIZE, "CMD HEADER INVALID %d/%d -> %02X|%02X|%02X|%02X|%02X", rb,
+                     sizeof(GamePadOutCtrlMsg), mOutCtrlMsg.header.magic, mOutCtrlMsg.header.cmd,
+                     mOutCtrlMsg.header.length, mOutCtrlMsg.ctr.cmds, mOutCtrlMsg.crc8);
+            serial->println(printBuf);
+        }
+
         stream.flush();
     }
-    return false;
+    return ret;
 }
 
 void cerp::GamePadCtrl::execOutCtrlMsg()
 {
-    digitalWrite(VIB_MOTOR, (mOutCtrlMsg.ctr.vibration == 1 ? HIGH : LOW));
+    if (mOutCtrlMsg.ctr.vibration == 1)
+    {
+        digitalWrite(VIB_MOTOR, HIGH);
+    }
+    else
+    {
+        digitalWrite(VIB_MOTOR, LOW);
+    }
 }

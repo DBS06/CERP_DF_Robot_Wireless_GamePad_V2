@@ -2,7 +2,7 @@
  * @file GamePad.ino
  * @author DBS06
  * @brief see README.md
- * @version 1.5
+ * @version 1.0.6
  * @date 2019-12-17
  *
  * @copyright Copyright DBS06 (c) 2019

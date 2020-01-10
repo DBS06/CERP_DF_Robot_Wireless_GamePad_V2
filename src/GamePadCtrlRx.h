@@ -19,11 +19,13 @@ public:
     ~GamePadCtrlRx();
 
     void begin(uint32_t serialTimeoutMs);
-    bool parseInpCtrlData(char *printBuf = nullptr, size_t printBufSize = 43);
+    bool parseInpCtrlData(char *printBuf = nullptr, size_t printBufSize = 42);
     const GamePadInpCtr &getInpCtrl(void);
-    void setGamePadCmd(const GamePadOutCtr &cmd);
+    void setGamePadCmd(const GamePadOutCtr &cmd, char *printBuf = nullptr, size_t printBufSize = 42);
 
 private:
+    void calcCrc8Value(void);
+
     Stream &mStream;                      ///< serial connection to i.e. communication module
     cerp::GamePadInpCtrlMsg mInpCtrlMsg;  ///< input message
     cerp::GamePadOutCtrlMsg mOutCtrlMsg;  ///< output message
