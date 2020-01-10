@@ -58,7 +58,7 @@ void cerp::GamePadCtrl::begin(void)
 
     mInpCtrlMsg.header.magic  = GPMH_MAGIC;
     mInpCtrlMsg.header.cmd    = GPMH_CMD_INP;
-    mInpCtrlMsg.header.length = sizeof(GamePadInpCtr) + sizeof(uint8_t);
+    mInpCtrlMsg.header.length = sizeof(GamePadInpCtr);
 
     // Signal button initialization finish
     digitalWrite(VIB_MOTOR, HIGH);
@@ -97,7 +97,7 @@ void cerp::GamePadCtrl::updateInpCtrlData(void)
 {
     readAnalogSticks();
     readButtons();
-    calcCrc8Value();
+    mInpCtrlMsg.crc8 = cerp::internal::crc8(mInpCtrlMsg.data, sizeof(GamePadInpCtrlMsg) - sizeof(uint8_t));
 }
 
 void cerp::GamePadCtrl::readButtons(void)
@@ -149,11 +149,6 @@ int8_t cerp::GamePadCtrl::normalizeAnalogStickVal(const int16_t stickVal, const 
     }
 }
 
-void cerp::GamePadCtrl::calcCrc8Value(void)
-{
-    mInpCtrlMsg.crc8 = cerp::internal::crc8(mInpCtrlMsg.data, sizeof(GamePadInpCtrlMsg) - sizeof(uint8_t));
-}
-
 void cerp::GamePadCtrl::transmitInpCtrMsg(Stream &stream)
 {
     stream.write(mInpCtrlMsg.data, sizeof(GamePadInpCtrlMsg));
@@ -167,11 +162,11 @@ void cerp::GamePadCtrl::printInpCtrlData(Stream &serial)
 #if PRINT_AS_HEX == 1
     snprintf(printBuf, printBufSize, "%04X|%04X|%04X|%04X|" UINT16_TO_BINARY_PATTERN "|%02X",
              mInpCtrlMsg.ctr.leftStickX, mInpCtrlMsg.ctr.leftStickY, mInpCtrlMsg.ctr.rightStickX,
-             mInpCtrlMsg.ctr.rightStickY, UINT16_TO_BINARY(mInpCtrlMsg.ctr.buttons), mOutCtrlMsg.crc8);
+             mInpCtrlMsg.ctr.rightStickY, UINT16_TO_BINARY(mInpCtrlMsg.ctr.buttons), mInpCtrlMsg.crc8);
 #else
     snprintf(printBuf, printBufSize, "%04d|%04d|%04d|%04d|" UINT16_TO_BINARY_PATTERN "|%02X",
              mInpCtrlMsg.ctr.leftStickX, mInpCtrlMsg.ctr.leftStickY, mInpCtrlMsg.ctr.rightStickX,
-             mInpCtrlMsg.ctr.rightStickY, UINT16_TO_BINARY(mInpCtrlMsg.ctr.buttons), mOutCtrlMsg.crc8);
+             mInpCtrlMsg.ctr.rightStickY, UINT16_TO_BINARY(mInpCtrlMsg.ctr.buttons), mInpCtrlMsg.crc8);
 #endif
 
     serial.println(printBuf);
@@ -212,8 +207,9 @@ bool cerp::GamePadCtrl::parseOutCtrlData(Stream &stream, Stream *serial)
         }
         else if (serial != nullptr)
         {
-            snprintf(printBuf, PRINT_BUF_SIZE, "CMD -> %02X|%02X|%02X|%02X|%02X", mOutCtrlMsg.header.magic,
-                     mOutCtrlMsg.header.cmd, mOutCtrlMsg.header.length, mOutCtrlMsg.ctr.cmds, mOutCtrlMsg.crc8);
+            snprintf(printBuf, PRINT_BUF_SIZE, "CMD HEADER INVALID %d/%d -> %02X|%02X|%02X|%02X|%02X", rb,
+                     sizeof(GamePadOutCtrlMsg), mOutCtrlMsg.header.magic, mOutCtrlMsg.header.cmd,
+                     mOutCtrlMsg.header.length, mOutCtrlMsg.ctr.cmds, mOutCtrlMsg.crc8);
             serial->println(printBuf);
         }
 

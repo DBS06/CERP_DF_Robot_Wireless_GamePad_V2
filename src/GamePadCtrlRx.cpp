@@ -31,7 +31,7 @@ void cerp::GamePadCtrlRx::begin(uint32_t serialTimeoutMs)
 {
     mOutCtrlMsg.header.magic  = GPMH_MAGIC;
     mOutCtrlMsg.header.cmd    = GPMH_CMD_OUT;
-    mOutCtrlMsg.header.length = sizeof(GamePadOutCtr) + sizeof(uint8_t);
+    mOutCtrlMsg.header.length = sizeof(GamePadOutCtr);
 
     mStream.setTimeout(serialTimeoutMs);
     mStream.flush();
@@ -57,9 +57,9 @@ bool cerp::GamePadCtrlRx::parseInpCtrlData(char *printBuf, size_t printBufSize)
 
             if (printBuf != nullptr && printBufSize >= PRINT_BUF_SIZE)
             {
-                snprintf(printBuf, printBufSize, "CMD |%04d|%04d|%04d|%04d|" UINT16_TO_BINARY_PATTERN,
+                snprintf(printBuf, printBufSize, "CMD |%04d|%04d|%04d|%04d|" UINT16_TO_BINARY_PATTERN "|%02X",
                          mInpCtrlMsg.ctr.leftStickX, mInpCtrlMsg.ctr.leftStickY, mInpCtrlMsg.ctr.rightStickX,
-                         mInpCtrlMsg.ctr.rightStickY, UINT16_TO_BINARY(mInpCtrlMsg.ctr.buttons));
+                         mInpCtrlMsg.ctr.rightStickY, UINT16_TO_BINARY(mInpCtrlMsg.ctr.buttons), mInpCtrlMsg.crc8);
             }
             else
             {
@@ -78,8 +78,11 @@ const cerp::GamePadInpCtr &cerp::GamePadCtrlRx::getInpCtrl(void)
 
 void cerp::GamePadCtrlRx::setGamePadCmd(const GamePadOutCtr &cmd, char *printBuf, size_t printBufSize)
 {
-    mOutCtrlMsg.ctr.cmds = cmd.cmds;
-    mOutCtrlMsg.crc8     = cerp::internal::crc8(mOutCtrlMsg.data, sizeof(GamePadOutCtrlMsg) - sizeof(uint8_t));
+    mOutCtrlMsg.ctr.cmds      = cmd.cmds;
+    mOutCtrlMsg.ctr._reserved = 0xE;  // not 0x0, because if a byte-stream with '66|10|01|00|17' (vibration off), on the
+                                      // receiver side only 4 instead of 5 bytes will be received. With setting this to
+                                      // a value, everything is ok...
+    mOutCtrlMsg.crc8 = cerp::internal::crc8(mOutCtrlMsg.data, sizeof(GamePadOutCtrlMsg) - sizeof(uint8_t));
     mStream.write(mOutCtrlMsg.data, sizeof(GamePadOutCtrlMsg));
 
     snprintf(printBuf, printBufSize, "CMD -> %02X|%02X|%02X|%02X|%02X", mOutCtrlMsg.header.magic,

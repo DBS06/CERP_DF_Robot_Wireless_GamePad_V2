@@ -50,7 +50,6 @@ void loop()
         const cerp::GamePadInpCtr &ctr = gpcr.getInpCtrl();
 
         // do whatever you want to do with input control data i.e.:
-        // println(ctr.leftStickX);
         gpocr.vibration = ctr.b3;
         if (vibrateState != gpocr.vibration)
         {
