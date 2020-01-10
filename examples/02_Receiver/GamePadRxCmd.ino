@@ -1,11 +1,11 @@
 /**
- * @file CERP_Robot.ino
+ * @file GamePadRxCmd.ino
  * @author DBS06
- * @brief
- * @version 0.1
+ * @brief see README.md
+ * @version 1.0.6
  * @date 2019-12-17
  *
- * @copyright Copyright (c) 2019
+ * @copyright Copyright DBS06 (c) 2019
  *
  */
 #include "Arduino.h"
